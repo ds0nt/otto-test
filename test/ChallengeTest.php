@@ -230,6 +230,9 @@ class ChallengeTest extends TestCase
         $this->assertCount(12, $results);
     }
 
+    /**
+     * @testdox Can retrieve a list of last 100 director records
+     */
     public function testCanGetLast100DirectorRecords()
     {
         $results = $this->getInstance()->getLast100Records();
@@ -257,6 +260,38 @@ class ChallengeTest extends TestCase
 
         $this->assertIsArray($results);
         $this->assertCount(100, $results);
+    }
+
+    /**
+     * @testdox Can retrieve a list of records for the table in index.phtml
+     */
+    public function testGetRecords() {
+        $results = $this->getInstance()->getRecords();
+
+        $requiredKeys = [
+            'id',
+            'first_name',
+            'last_name',
+            'name',
+            'registered_address',
+            'registration_number'
+        ];
+
+        if(!$results)
+        {
+            $this->fail("No results received");
+        }
+
+        foreach($results as $director)
+        {
+            foreach($requiredKeys as $key)
+            {
+                $this->assertArrayHasKey($key, $director);
+            }
+        }
+
+        $this->assertIsArray($results);
+        $this->assertCount(1000, $results);
     }
 
     /**

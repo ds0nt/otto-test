@@ -1,0 +1,35 @@
+# to build and run the containerized web application:
+#  docker-compose build
+#  docker-compose up
+
+version: '3'
+services:
+  # php server
+  php:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+
+  # mysql server  
+  #  
+  # to load the code challenge data: 
+  #  docker-compose exec -Ti db mysql -u root --password=example < otto-php-pdo-code-challenge-db.sql
+  db:
+    image: mysql
+    restart:  always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+
+  # dev tools
+  # used for composer install and composer test
+  #
+  #  docker-compose exec dev composer install (will modify vendor folder on host machine)
+  #  docker-compose exec dev composer test 
+  dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app

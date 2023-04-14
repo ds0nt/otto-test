@@ -1,6 +1,7 @@
 <?php
 
 namespace Otto;
+use PDO;
 
 class Challenge
 {
@@ -19,7 +20,8 @@ class Challenge
      */
     public function getDirectorRecords()
     {
-        //..
+        $qry = 'SELECT * FROM directors';
+        return $this->getPdoBuilder()->getPdo()->query($qry)->fetchAll();
     }
 
     /**
@@ -30,7 +32,13 @@ class Challenge
      */
     public function getSingleDirectorRecord($id)
     {
-        //..
+        $qry = 'SELECT * FROM directors WHERE id = :id';
+        
+        $stmt = $this->getPdoBuilder()->getPdo()->prepare($qry);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch();
     }
 
     /**
@@ -40,7 +48,8 @@ class Challenge
      */
     public function getBusinessRecords()
     {
-        //..
+        $qry = 'SELECT * FROM businesses';
+        return $this->getPdoBuilder()->getPdo()->query($qry)->fetchAll();
     }
 
     /**
@@ -51,7 +60,14 @@ class Challenge
      */
     public function getSingleBusinessRecord($id)
     {
-        //..
+        $qry = 'SELECT * FROM businesses WHERE id = :id';
+        
+        $stmt = $this->getPdoBuilder()->getPdo()->prepare($qry);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch();
+        
     }
 
     /**
@@ -60,9 +76,13 @@ class Challenge
      * @param int $year
      * @return array
      */
-    public function getBusinessesRegisteredInYear($year)
-    {
-        //..
+    public function getBusinessesRegisteredInYear($year) {
+        $qry = 'SELECT * FROM businesses WHERE year(registration_date) = :year';
+
+        $stmt = $this->getPdoBuilder()->getPdo()->prepare($qry);
+        $stmt->bindParam(':year', $year, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     /**
@@ -72,7 +92,8 @@ class Challenge
      */
     public function getLast100Records()
     {
-        //..
+        $qry = 'SELECT * FROM directors ORDER BY id DESC LIMIT 100';
+        return $this->getPdoBuilder()->getPdo()->query($qry)->fetchAll();
     }
 
     /**
@@ -89,7 +110,41 @@ class Challenge
      */
     public function getBusinessNameWithDirectorFullName()
     {
-        //..
+        $qry = <<<'EOT'
+SELECT 
+        b.name as business_name, 
+        concat(d.first_name, " ", d.last_name) as director_name
+    FROM director_businesses as dbiz 
+    JOIN businesses as b on b.id = dbiz.business_id 
+    JOIN directors as d on d.id = dbiz.director_id;
+EOT;
+        return $this->getPdoBuilder()->getPdo()->query($qry)->fetchAll();
+    }
+
+    /**
+     * 
+     * Use the PDOBuilder to populate the table in index.html
+     * 
+     * It wasn't in the original test, but this fixes the call to a missing method getRecords() in index.php
+     *   
+     * @return array
+     */
+    public function getRecords()
+    {
+
+        $qry = <<<'EOT'
+SELECT 
+        b.id, 
+        d.first_name,
+        d.last_name, 
+        b.name, 
+        b.registered_address, 
+        b.registration_number
+    FROM director_businesses as dbiz
+    JOIN businesses as b on b.id = dbiz.business_id
+    JOIN directors as d on d.id = dbiz.director_id;
+EOT;
+        return $this->getPdoBuilder()->getPdo()->query($qry)->fetchAll();
     }
 
     /**

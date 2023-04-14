@@ -1,0 +1,23 @@
+FROM php:7
+
+RUN docker-php-ext-install mysqli pdo_mysql
+RUN apt-get update && \
+    apt-get install -y git && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+
+
+# set permissions so composer is happy
+RUN mkdir /app
+RUN addgroup --gid 1000 php
+RUN adduser --uid 1000 --gid 1000 --disabled-password --gecos "" php
+RUN chown -R php:php /app
+USER 1000
+
+WORKDIR /app
+VOLUME /app
+
+CMD sleep 1000000
+
+# then run commands inside the container, such as composer install and
+# they will affect this folder via the volume.
